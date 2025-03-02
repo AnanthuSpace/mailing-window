@@ -55,17 +55,18 @@ npm run dev
 ```sh
 cd backend
 npm install
-npm start
+npm run dev
 ```
 
 ## API Endpoints (Mock Data)
 
 | Method | Endpoint        | Description            |
 |--------|---------------|------------------------|
-| `POST` | `/api/auth/signup` | User registration |
-| `POST` | `/api/auth/signin` | User login |
-| `GET`  | `/api/emails` | Fetch emails list |
-| `GET`  | `/api/emails/:id` | Get email details |
+| `POST` | `/api/auth` | User registration |
+| `POST` | `/api/auth/login` | User login |
+| `POST` | `/api/auth/login` | User login |
+| `POST`  | `/api/google-signup` | Google Signup |
+| `POST`  | `/api/google-signin` |Google Signin |
 
 ## Future Enhancements
 
