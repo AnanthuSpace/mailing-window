@@ -8,8 +8,8 @@ export type Email = {
     subject: string;
     preview: string;
     time: string;
-    replyTo: string;   // Sender's email address
-    content: string;   // Full email content
+    replyTo: string;
+    content: string;
 };
 
 
@@ -26,3 +26,15 @@ export type EmailListProps = {
 export type EmailContentProps = {
     email?: Email | null;
 };
+
+export interface UserData {
+    userId: string;
+    name: string;
+    email: string;
+}
+
+export interface UserState {
+    userData: UserData | null;
+    loading: boolean;
+    error: string | null;
+}
