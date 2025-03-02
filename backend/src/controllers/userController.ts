@@ -20,7 +20,16 @@ export class UserController {
             const email = req.body.email as string
             const otp = req.body.otp as string
             const response = await this.userService.verifyOtpService(email, otp)
-            console.log(response)
+            res.status(200).json({ success: true, response })
+        } catch (error) {
+            console.error(error);
+            next(error)
+        }
+    }
+
+    googleSignup = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const response = await this.userService.googleSignup(req.body.token)
             res.status(200).json({ success: true, response })
         } catch (error) {
             console.error(error);

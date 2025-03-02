@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { loginUser, optVerification } from "./userThunk";
+import { googleSignup, loginUser, optVerification } from "./userThunk";
 import { toast } from "sonner";
 import { UserState } from "../types/types";
 
@@ -83,7 +83,21 @@ const userSlice = createSlice({
 
         toast.error(errorMessage, { duration: 3000 });
         state.error = errorMessage;
+      })
+
+      .addCase(googleSignup.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(googleSignup.fulfilled, (state, action) => {
+        state.loading = false;
+        state.userData = action.payload;
+      })
+      .addCase(googleSignup.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
+
   },
 });
 

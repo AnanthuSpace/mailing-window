@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../store";
-import { loginUser } from "../redux/userThunk";
+import { googleSignup, loginUser } from "../redux/userThunk";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
@@ -44,11 +44,21 @@ const Signup = () => {
   };
   
 
-  const handleGoogleSuccess = (response: any) => {
+  const handleGoogleSuccess = async (response: any) => {
     console.log("Google User Data:", response);
-    navigate("/");
+    
+    try {
+      const result = await dispatch(googleSignup({ token: response.credential })); 
+      if (googleSignup.fulfilled.match(result)) {
+        navigate("/"); 
+      } else {
+        console.error("Google Signup Error:", result.payload);
+      }
+    } catch (error) {
+      console.error("Dispatch Error:", error);
+    }
   };
-
+  
   const handleGoogleFailure = () => {
     console.error("Google Sign-In Failed");
   };

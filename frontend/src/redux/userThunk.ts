@@ -29,3 +29,25 @@ export const optVerification = createAsyncThunk(
     }
   }
 );
+
+
+
+export const googleSignup = createAsyncThunk(
+  "user/googleSignup",
+  async ({ token }: { token: string }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post("http://localhost:4000/api/google-signup", { token });
+      const { accessToken, refreshToken, userData } = response.data.response;
+
+      sessionStorage.setItem("userAccessToken", accessToken);
+      localStorage.setItem("userRefreshToken", refreshToken);
+      localStorage.setItem("userData", JSON.stringify(userData));
+      return userData;
+    } catch (error: any) {
+      if (error.response?.data?.message === "Internal server error") {
+        return rejectWithValue("Verification failed, try again");
+      }
+      return rejectWithValue(error.response?.data?.message || "Google Signup Failed");
+    }
+  }
+);

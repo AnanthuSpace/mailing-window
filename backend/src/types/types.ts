@@ -2,7 +2,7 @@ export type User = {
     userId?: string;
     name: string;
     email: string;
-    password: string;
+    password?: string;
   };
   
   export type Email = {
@@ -19,7 +19,7 @@ export interface IUser extends Document {
   userId: string,
   name: string;
   email: string;
-  password: string;
+  password?: string;
 }
 
 export interface IEmail extends Document {

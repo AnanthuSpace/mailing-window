@@ -7,6 +7,7 @@ import { hashPassword } from "../utils/bcrypt";
 import { sendMail } from "../utils/nodeMailer";
 import { v4 } from "uuid";
 import { generateAccessToken, generateRefreshToken } from "../config/jwtConfig";
+import { verifyGoogleToken } from "../utils/googleAuth";
 
 export class UserService implements UserServiceInterface {
   constructor(private userRepository: UserRepositoryInterface) { }
@@ -26,7 +27,7 @@ export class UserService implements UserServiceInterface {
       if (existedUser) {
         throw new BadRequestError("User with this email already exists.");
       }
-      console.log(existedUser)
+
       const otp = createOTP();
       const isMailSended = await sendMail(userData.email, otp);
 
@@ -51,7 +52,8 @@ export class UserService implements UserServiceInterface {
       }
 
       const userData = storedData.userData;
-      userData.password = await hashPassword(userData.password);
+      userData.password = await hashPassword(userData.password ?? "");
+
       userData.userId = v4();
 
       console.log(userData)
@@ -79,4 +81,43 @@ export class UserService implements UserServiceInterface {
       throw new Error(error.message || "OTP verification failed");
     }
   }
+
+  async googleSignup(token: string): Promise<any> {
+    try {
+      const userInfo = await verifyGoogleToken(token);
+
+      if (userInfo?.email_verified === true) {
+        const name = userInfo.name as string;
+        const email = userInfo.email as string;
+        const existedEmail = await this.userRepository.getUserByEmail(email);
+
+        if (existedEmail) {
+          throw new BadRequestError("User with this email already exists.");
+        }
+
+        let userId = v4();
+
+        const createdUser = await this.userRepository.createUser({
+          name,
+          email,
+          userId,
+        });
+
+        const accessToken = generateAccessToken(createdUser.userId);
+        const refreshToken = generateRefreshToken(createdUser.userId);
+
+        return {
+          message: "Google signup successful",
+          accessToken,
+          refreshToken,
+          userData: createdUser,
+        };
+      } else {
+        throw new Error("Google email verification failed.");
+      }
+    } catch (error: any) {
+      throw new Error(error.message || "Google signup failed");
+    }
+  }
+
 }
