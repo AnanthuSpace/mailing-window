@@ -8,6 +8,7 @@ export class UserRepository implements UserRepositoryInterface {
     async getUserByEmail(email: string): Promise<any> {
         return await this.userModel.findOne({ email });
     }
+    
     async createUser(userData: any) {
         try {    
             const user = await this.userModel.create({  

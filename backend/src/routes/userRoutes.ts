@@ -13,5 +13,7 @@ const userController = new UserController(userService)
 userRoute.post("/auth", userController.registration);
 userRoute.post("/verify-otp", userController.verifyOtp);
 userRoute.post("/google-signup", userController.googleSignup);
+userRoute.post("/login", userController.login);
+userRoute.post("/google-signin", userController.googleSignin);
 
 export { userRoute }    

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { googleSignup, loginUser, optVerification } from "./userThunk";
+import { googleSignup, signupUser, optVerification, loginUser, googleSignin } from "./userThunk";
 import { toast } from "sonner";
 import { UserState } from "../types/types";
 
@@ -24,19 +24,21 @@ const userSlice = createSlice({
       sessionStorage.removeItem("userAccessToken");
     },
   },
+
+
   extraReducers: (builder) => {
     builder
-      .addCase(loginUser.pending, (state) => {
+      .addCase(signupUser.pending, (state) => {
         state.loading = true;
       })
       .addCase(
-        loginUser.fulfilled,
+        signupUser.fulfilled,
         (state, action: PayloadAction<{ msg: string }>) => {
           toast.success(action.payload.msg, { duration: 3000 });
           state.loading = false;
         }
       )
-      .addCase(loginUser.rejected, (state, action) => {
+      .addCase(signupUser.rejected, (state, action) => {
         state.error = action.payload as string;
         if (
           action.payload === "User already exists" ||
@@ -96,7 +98,35 @@ const userSlice = createSlice({
       .addCase(googleSignup.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
+      })
+
+      builder
+      .addCase(loginUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.userData = action.payload;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      builder
+      .addCase(googleSignin.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(googleSignin.fulfilled, (state, action) => {
+        state.loading = false;
+        state.userData = action.payload;
+      })
+      .addCase(googleSignin.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
 
   },
 });

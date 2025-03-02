@@ -36,4 +36,24 @@ export class UserController {
             next(error)
         }
     }
+    login = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { email, password } = req.body
+            const response = await this.userService.login(email, password)
+            res.status(200).json({ success: true, response })
+        } catch (error) {
+            console.error(error);
+            next(error)
+        }
+    }
+
+    googleSignin = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const response = await this.userService.googleSignin(req.body.token)
+            res.status(200).json({ success: true, response })
+        } catch (error) {
+            console.error(error);
+            next(error)
+        }
+    }
 }

@@ -1,12 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-export const loginUser = createAsyncThunk<
+export const signupUser = createAsyncThunk<
   { msg: string },
   { name: string; email: string; password: string },
   { rejectValue: string }
 >(
-  "user/loginUser",
+  "user/signupUser",
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await axios.post("http://localhost:4000/api/auth", credentials);
@@ -47,6 +47,42 @@ export const googleSignup = createAsyncThunk(
       if (error.response?.data?.message === "Internal server error") {
         return rejectWithValue("Verification failed, try again");
       }
+      return rejectWithValue(error.response?.data?.message || "Google Signup Failed");
+    }
+  }
+);
+
+export const loginUser = createAsyncThunk(
+  "user/login",
+  async ({ email, password }: { email: string; password: string }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post("http://localhost:4000/api/login", { email, password });
+      const { accessToken, refreshToken, userData } = response.data.response;
+
+      sessionStorage.setItem("userAccessToken", accessToken);
+      localStorage.setItem("userRefreshToken", refreshToken);
+      localStorage.setItem("userData", JSON.stringify(userData));
+
+      return userData;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Login Failed");
+    }
+  }
+);
+
+export const googleSignin = createAsyncThunk(
+  "user/googleSignin",
+  async ({ token }: { token: string }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post("http://localhost:4000/api/google-signin", { token });
+      const { accessToken, refreshToken, userData } = response.data.response;
+
+      sessionStorage.setItem("userAccessToken", accessToken);
+      localStorage.setItem("userRefreshToken", refreshToken);
+      localStorage.setItem("userData", JSON.stringify(userData));
+
+      return userData;
+    } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || "Google Signup Failed");
     }
   }

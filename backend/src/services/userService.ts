@@ -8,6 +8,7 @@ import { sendMail } from "../utils/nodeMailer";
 import { v4 } from "uuid";
 import { generateAccessToken, generateRefreshToken } from "../config/jwtConfig";
 import { verifyGoogleToken } from "../utils/googleAuth";
+import bcrypt from "bcrypt";
 
 export class UserService implements UserServiceInterface {
   constructor(private userRepository: UserRepositoryInterface) { }
@@ -114,6 +115,49 @@ export class UserService implements UserServiceInterface {
         };
       } else {
         throw new Error("Google email verification failed.");
+      }
+    } catch (error: any) {
+      throw new Error(error.message || "Google signup failed");
+    }
+  }
+
+  async login(email: string, password: string): Promise<any> {
+    try {
+      const existedEmail = await this.userRepository.getUserByEmail(email);
+
+      if (!existedEmail) {
+        throw new BadRequestError("Invalid email or user not found");
+      }
+
+      const bcryptPass = await bcrypt.compare(password, existedEmail.password);
+      if (!bcryptPass) {
+        throw new Error("Invalid password");
+      }
+
+      const accessToken = generateAccessToken(existedEmail.userId);
+      const refreshToken = generateRefreshToken(existedEmail.userId);
+
+      return { accessToken, refreshToken, userData: existedEmail };
+
+    } catch (error: any) {
+      throw new Error(error.message || "Google signup failed");
+    }
+  }
+
+  async googleSignin(token: string): Promise<any> {
+    try {
+      const userInfo = await verifyGoogleToken(token)
+      if (userInfo?.email_verified === true) {
+        const email = userInfo.email as string
+        const existedEmail = await this.userRepository.getUserByEmail(email);
+        if (!existedEmail) {
+          throw new Error("Invalid email or user not found")
+        } else {
+
+          const accessToken = generateAccessToken(existedEmail.userId);
+          const refreshToken = generateRefreshToken(existedEmail.userId);
+          return { message: "Login successfully", accessToken, refreshToken, userData: existedEmail };
+        }
       }
     } catch (error: any) {
       throw new Error(error.message || "Google signup failed");
